@@ -34,7 +34,7 @@ public class HttpRequestHandler implements HandlerContract, HttpRequestHandlerCo
         requestCaptureService.saveRequest(requestCapture);
         List<RequestCapture> requests = this.findRequestsByLastFiveSeconds(originIp);
         if (requests.size() >= 5) {
-            this.blockIpForTenSeconds(originIp);
+            this.blockIpForTwentySeconds(originIp);
             response.setStatus(403);
             return false;
         }
@@ -50,7 +50,7 @@ public class HttpRequestHandler implements HandlerContract, HttpRequestHandlerCo
     }
 
     @Override
-    public void blockIpForTenSeconds(String originIp) {
+    public void blockIpForTwentySeconds(String originIp) {
         BlackListIp blackListIp = new BlackListIp();
         blackListIp.setIp(originIp);
         LocalDateTime expiresAt = LocalDateTime.now().plusSeconds(20);

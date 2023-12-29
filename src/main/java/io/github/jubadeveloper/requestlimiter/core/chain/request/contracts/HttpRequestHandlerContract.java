@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface HttpRequestHandlerContract {
     List<RequestCapture> findRequestsByLastFiveSeconds (String originIp);
-    void blockIpForTenSeconds (String originIp);
+    void blockIpForTwentySeconds (String originIp);
 }
