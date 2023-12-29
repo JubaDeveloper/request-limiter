@@ -25,7 +25,7 @@ class RequestLimiterApplicationTests {
 	void shouldBlockIp () throws Exception {
 		// Make four (4) requests after ip blocking
 		CommandLineRunner dateGetRequest = (v) -> restTemplate.getForEntity(String.format("http://localhost:%d/date", port), String.class);
-		for (int x = 0; x < 4; x++) {
+		for (int x = 0; x < 5; x++) {
 			dateGetRequest.run();
 		}
 		ResponseEntity<String> result = restTemplate.getForEntity(String.format("http://localhost:%d/date", port), String.class);

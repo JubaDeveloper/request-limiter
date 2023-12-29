@@ -33,7 +33,7 @@ public class HttpRequestHandler implements HandlerContract, HttpRequestHandlerCo
         requestCapture.setOriginIP(originIp);
         requestCaptureService.saveRequest(requestCapture);
         List<RequestCapture> requests = this.findRequestsByLastFiveSeconds(originIp);
-        if (requests.size() >= 5) {
+        if (requests.size() > 5) {
             this.blockIpForTwentySeconds(originIp);
             response.setStatus(403);
             return false;
