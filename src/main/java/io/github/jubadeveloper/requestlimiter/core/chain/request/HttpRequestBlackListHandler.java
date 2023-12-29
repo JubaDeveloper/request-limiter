@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -23,7 +24,7 @@ public class HttpRequestBlackListHandler implements HandlerContract {
     }
     @Override
     @Transactional
-    public boolean execute(HttpServletRequest httpServletRequest,  HttpServletResponse response) {
+    public boolean execute(HttpServletRequest httpServletRequest,  HttpServletResponse response) throws IOException {
         String originIp = httpServletRequest.getRemoteAddr();
         BlackListIp blackListIp = blackListIpService.getBlackListIpFromIp(originIp);
         if (blackListIp == null) {
@@ -34,7 +35,8 @@ public class HttpRequestBlackListHandler implements HandlerContract {
             blackListIpService.deleteBlackListIp(originIp);
             return httpRequestHandler.execute(httpServletRequest, response);
         }
-        response.setStatus(403);
+        response.setStatus(429);
+        response.setHeader("Retry-After", String.valueOf(blackListIp.getExpiresAt().getSecond() - currentDate.getSecond()));
         return false;
     }
 }
