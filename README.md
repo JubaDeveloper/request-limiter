@@ -4,7 +4,7 @@ The project consists in a interceptor that will limiter the amount of requests b
 
 ## Usage
 
-Make 5 continuously requests to /date endpoint in a period of 5 seconds and then will see the 403 request status code
+Make 6 continuously requests to /date endpoint in a period of 5 seconds and then will see the 403 request status code
 
 ### Running application
 
