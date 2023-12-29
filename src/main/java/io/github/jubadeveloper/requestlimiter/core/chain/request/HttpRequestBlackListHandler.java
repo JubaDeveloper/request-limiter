@@ -1,5 +1,6 @@
 package io.github.jubadeveloper.requestlimiter.core.chain.request;
 
+import io.github.jubadeveloper.requestlimiter.core.chain.request.contracts.BlackListExpiration;
 import io.github.jubadeveloper.requestlimiter.core.chain.request.contracts.HandlerContract;
 import io.github.jubadeveloper.requestlimiter.core.entities.BlackListIp;
 import io.github.jubadeveloper.requestlimiter.core.services.BlackListIpService;
@@ -10,12 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.time.LocalDate;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Component
-public class HttpRequestBlackListHandler implements HandlerContract {
+public class HttpRequestBlackListHandler implements HandlerContract, BlackListExpiration {
     HttpRequestHandler httpRequestHandler;
     @Autowired
     BlackListIpService blackListIpService;
@@ -36,7 +36,13 @@ public class HttpRequestBlackListHandler implements HandlerContract {
             return httpRequestHandler.execute(httpServletRequest, response);
         }
         response.setStatus(429);
-        response.setHeader("Retry-After", String.valueOf(blackListIp.getExpiresAt().getSecond() - currentDate.getSecond()));
+        response.setHeader("Retry-After", String.valueOf(this.getExpirationSeconds(blackListIp)));
         return false;
+    }
+    @Override
+    public long getExpirationSeconds (BlackListIp blackListIp) {
+        Timestamp now = Timestamp.valueOf(LocalDateTime.now());
+        Timestamp expiration = Timestamp.valueOf(blackListIp.getExpiresAt());
+        return (expiration.getTime() - now.getTime()) / 1000;
     }
 }

@@ -1,5 +1,6 @@
 package io.github.jubadeveloper.requestlimiter.core.chain.request;
 
+import io.github.jubadeveloper.requestlimiter.core.chain.request.contracts.BlackListExpiration;
 import io.github.jubadeveloper.requestlimiter.core.chain.request.contracts.HandlerContract;
 import io.github.jubadeveloper.requestlimiter.core.chain.request.contracts.HttpRequestHandlerContract;
 import io.github.jubadeveloper.requestlimiter.core.entities.BlackListIp;
@@ -12,15 +13,12 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
-import java.time.LocalDate;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Date;
 
 @Component
-public class HttpRequestHandler implements HandlerContract, HttpRequestHandlerContract {
+public class HttpRequestHandler implements HandlerContract, BlackListExpiration, HttpRequestHandlerContract {
     @Autowired
     RequestCaptureService requestCaptureService;
     @Autowired
@@ -36,7 +34,8 @@ public class HttpRequestHandler implements HandlerContract, HttpRequestHandlerCo
         if (requests.size() > 5) {
             BlackListIp blackListIp = this.blockIpForTwentySeconds(originIp);
             response.setStatus(429);
-            response.setHeader("Retry-After", String.valueOf(blackListIp.getExpiresAt().getSecond() - LocalDateTime.now().getSecond()));            return false;
+            response.setHeader("Retry-After", String.valueOf(this.getExpirationSeconds(blackListIp)));
+            return false;
         }
         return true;
     }
@@ -58,5 +57,11 @@ public class HttpRequestHandler implements HandlerContract, HttpRequestHandlerCo
         BlackListIp blackListIp1 = blackListIpService.createNewBlackListedIp(blackListIp);
         requestCaptureService.deleteByIp(originIp);
         return blackListIp1;
+    }
+    @Override
+    public long getExpirationSeconds (BlackListIp blackListIp) {
+        Timestamp now = Timestamp.valueOf(LocalDateTime.now());
+        Timestamp expiration = Timestamp.valueOf(blackListIp.getExpiresAt());
+        return (expiration.getTime() - now.getTime()) / 1000;
     }
 }
