@@ -29,7 +29,7 @@ class RequestLimiterApplicationTests {
 			dateGetRequest.run();
 		}
 		ResponseEntity<String> result = restTemplate.getForEntity(String.format("http://localhost:%d/date", port), String.class);
-		Assertions.assertThat(result.getStatusCode().value()).isEqualTo(403);
+		Assertions.assertThat(result.getStatusCode().value()).isEqualTo(429);
 	}
 
 }
